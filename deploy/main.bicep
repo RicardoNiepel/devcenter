@@ -69,11 +69,12 @@ module devcenter './modules/devcenter.bicep' = {
 
 module project './modules/project.bicep' = {
   scope: resourceGroup(rg.name)
-  name: projectName
+  name: '${basePrefix}-project'
   params: {
     basePrefix: basePrefix
     location: location
     devcenterName: devcenter.outputs.devcenterName
+    projectName: projectName
   }
 }
 
@@ -144,7 +145,7 @@ module ade './modules/ade.bicep' = if (deployAde) {
 module AdeIdOwnerRoleAssignement './modules/subscriptionOwnerRole.bicep' = if (deployAde) {
   name: '${basePrefix}-owner-identity'
   params: {
-    identityPrincipalIds: deployAde ? [ade.outputs.adeIdentityPrincipalId, devcenter.outputs.devcenterIdentityPricipalId] : []
+    identityPrincipalIds: deployAde ? [ ade.outputs.adeIdentityPrincipalId, devcenter.outputs.devcenterIdentityPricipalId ] : []
   }
 
   dependsOn: [

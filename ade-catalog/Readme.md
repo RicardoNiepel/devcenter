@@ -9,4 +9,7 @@ If you want to create bicep-files you need to build them to ARM templates first:
 az bicep build --file main.bicep --outfile azuredeploy.json
 ```
 
-## Configure Catalog Items
+## Other Catalogs
+
+* https://github.com/microsoft/devcenter-catalog
+* https://github.com/carmada-dev/demo-environments/

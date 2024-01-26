@@ -84,8 +84,18 @@ resource catalog 'Microsoft.DevCenter/devcenters/catalogs@2023-04-01' = {
 }
 
 // Create an environment in DevCenter
-resource environment 'Microsoft.DevCenter/devcenters/environmentTypes@2023-04-01' = {
-  name: 'dev'
+resource devEnvironment 'Microsoft.DevCenter/devcenters/environmentTypes@2023-04-01' = {
+  name: 'Dev'
+  parent: devcenter
+}
+
+resource sandboxEnvironment 'Microsoft.DevCenter/devcenters/environmentTypes@2023-04-01' = {
+  name: 'Sandbox'
+  parent: devcenter
+}
+
+resource prodEnvironment 'Microsoft.DevCenter/devcenters/environmentTypes@2023-04-01' = {
+  name: 'Prod'
   parent: devcenter
 }
 
@@ -100,8 +110,8 @@ resource ownerRoleDefinition 'Microsoft.Authorization/roleDefinitions@2018-01-01
   name: '8e3af657-a8ff-443c-a75c-2fe8c4bcb635'
 }
 
-resource projectEnvironment 'Microsoft.DevCenter/projects/environmentTypes@2022-09-01-preview' = {
-  name: 'dev'
+resource devProjectEnvironment 'Microsoft.DevCenter/projects/environmentTypes@2022-09-01-preview' = {
+  name: devEnvironment.name
   location: location
   identity: {
     type: 'UserAssigned'
@@ -116,13 +126,32 @@ resource projectEnvironment 'Microsoft.DevCenter/projects/environmentTypes@2022-
         '${ownerRoleDefinition.name}': {}
       }
     }
-#disable-next-line use-resource-id-functions
+    #disable-next-line use-resource-id-functions
     deploymentTargetId: subscription().id
     status: 'Enabled'
   }
-  dependsOn: [
-    environment
-  ]
+}
+
+resource sandboxProjectEnvironment 'Microsoft.DevCenter/projects/environmentTypes@2022-09-01-preview' = {
+  name: sandboxEnvironment.name
+  location: location
+  identity: {
+    type: 'UserAssigned'
+    userAssignedIdentities: {
+      '${adeIdentity.id}': {}
+    }
+  }
+  parent: project
+  properties: {
+    creatorRoleAssignment: {
+      roles: {
+        '${ownerRoleDefinition.name}': {}
+      }
+    }
+    #disable-next-line use-resource-id-functions
+    deploymentTargetId: subscription().id
+    status: 'Enabled'
+  }
 }
 
 // Role Assignments for Devployment Environment
@@ -155,4 +184,4 @@ resource projectAdminAssignment 'Microsoft.Authorization/roleAssignments@2022-04
 }]
 
 output adeIdentityPrincipalId string = adeIdentity.properties.principalId
-output projectEnv string = projectEnvironment.properties.status
+output projectEnv string = devProjectEnvironment.properties.status
